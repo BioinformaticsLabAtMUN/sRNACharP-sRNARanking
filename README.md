@@ -1,5 +1,5 @@
 # sRNACharP-sRNARanking
-Nextflow pipeline combining [sRNACharP](https://github.com/BioinformaticsLabAtMUN/sRNACharP) and [sRNARanking](https://github.com/BioinformaticsLabAtMUN/sRNARanking).
+sRNACharP-sRNARanking is a project modified from [sRNACharP](https://github.com/BioinformaticsLabAtMUN/sRNACharP) and [sRNARanking](https://github.com/BioinformaticsLabAtMUN/sRNARanking).
 
 A  Pipeline written in the [Nextflow DSL](http://nextflow.io) for small RNA Characterization (sRNACharP) and nucleotide sequences Ranking (sRNARanking).
 

@@ -37,6 +37,8 @@
 * Version 1.0.0. 2018
 */
 
+// The code of this file is modified from sRNACharP (https://github.com/BioinformaticsLabAtMUN/sRNACharP)
+// and sRNARanking (https://github.com/BioinformaticsLabAtMUN/sRNARanking)
 params.transtermFile = null
 params.help = false
 
