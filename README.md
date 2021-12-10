@@ -1,7 +1,5 @@
 # sRNACharP-sRNARanking
-Nextflow pipeline combining sRNACharP and sRNARanking
-
-# sRNACharP-sRNARanking
+Nextflow pipeline combining [sRNACharP](https://github.com/BioinformaticsLabAtMUN/sRNACharP) and [sRNARanking](https://github.com/BioinformaticsLabAtMUN/sRNARanking).
 
 A  Pipeline written in the [Nextflow DSL](http://nextflow.io) for small RNA Characterization (sRNACharP) and nucleotide sequences Ranking (sRNARanking).
 
@@ -27,7 +25,7 @@ Nextflow can be installed on any POSIX system (UNIX-like system such as Linux, O
 
 ## 1.2 Other software
 
-sRNACharP  requires several pieces of software. There are two ways to get sRNACharP to run: 1) install all of the software packages required natively, or 2) use sRNACharP [Docker](https://www.docker.com/) container (recommended).
+sRNACharP-Ranking  requires several pieces of software. There are two ways to get sRNACharP-Ranking to run: 1) install all of the software packages required natively, or 2) use sRNACharP-Ranking [Docker](https://www.docker.com/) container (recommended).
 
 ## *Docker
 
@@ -46,24 +44,24 @@ The pipeline can also be used without Docker by installing the following softwar
 * [CentroidFold](https://github.com/satoken/centroid-rna-package) (requires Boost libraries)
 * [TransTermHP](http://transterm.cbcb.umd.edu/index.php) version 2.09
 * [R](https://www.r-project.org/) version 3.4 (or higher)
-
+* [Python](https://www.python.org/) version 3.8 with the libraries pickle and pandas installed
 ## 2. Pipeline usage
 
-After downloading the file [sRNACharP.nf](sRNACharP.nf), one can launch the pipeline with the `--help ` parameter (make sure you run this command on the directory where sRNACharP.nf is located). This should show the help message:
+After downloading the file [sRNACharP-Ranking.nf](sRNACharP-Ranking.nf), one can launch the pipeline with the `--help ` parameter (make sure you run this command on the directory where sRNACharP-Ranking.nf is located). This should show the help message:
 
 ```
-nextflow run sRNACharP.nf  --help
+nextflow run sRNACharP-Ranking.nf  --help
 ```
 
 ```
-N E X T F L O W  ~  version 20.10.0
-Launching `sRNACharP.nf` [adoring_volta] - revision: c85fc3d135
+N E X T F L O W  ~  version 21.04.3
+Launching `sRNACharP-Ranking.nf` [deadly_watson] - revision: 547947a18a
 
 sRNACharP: sRNA Characterization Pipeline
 ----------------------------------------------------
 
 Usage: 
-    sRNACharP [options]
+    sRNACharP-sRNARanking [options]
 
 Options:
 --org           ORGANISM         the organism name [required]
@@ -73,7 +71,7 @@ Options:
 --sRNAs         SEQUENCE_FILE    the sRNAs file in BED format [required]
 --transtermFile TRANSTERM_FILE   the TransTerm predictions file [optional].
 --promoterFile  PREDICTED_PROMOTER_FILE the Promoter predictions file [required]
-
+--classifier  CLASSIFIER_FOR_sRNA the random forest classifier file [required]
 ```
 
 The organism name is any alphanumeric string without whitespaces.
@@ -99,13 +97,12 @@ NOTE: Make sure that the sequence identifier is the same in both BED files and i
 
 ## 3. Running the pipeline
 
-sRNACharP is configured to run using the [Docker](https://www.docker.com/) container engine by default (see [Nextflow config file](nextflow.config)). If you are using Docker, download the [Nextflow config file](nextflow.config) and save it on the same directory as the sRNACharP.nf file. If you have installed the required software natively, you will need to modify the [Nextflow config file](nextflow.config).
+sRNACharP-Ranking is configured to run using the [Docker](https://www.docker.com/) container engine by default (see [Nextflow config file](nextflow.config)). If you are using Docker, download the [Nextflow config file](nextflow.config) and save it on the same directory as the sRNACharP-Ranking.nf file. If you have installed the required software natively, you will need to modify the [Nextflow config file](nextflow.config).
 
-A [sample data set](test_data) is provided. To run sRNACharP with the test data, replace ADD_PATH below with the correct path in your system and run the following command on your terminal (make sure you are executing nextflow on the directory where the sRNACharP.nf file and the Nextflow config file are located):
+A [sample data set](test_data) is provided. To run sRNACharP-Ranking with the test data, replace ADD_PATH below with the correct path in your system and run the following command on your terminal (make sure you are executing nextflow on the directory where the sRNACharP-Ranking.nf file and the Nextflow config file are located):
 
 ```
-nextflow run sRNACharP.nf  --org="R_capsulatus" --dir="/ADD_PATH/sRNACharP/test_data" --genome="R_capsulatus_genome.fasta"  --sRNAs="R_capsulatus_sRNAs.bed" --genomeAnnotation="R_capsulatus_genomeAnnotation_proteincoding.bed" --promoterFile="R_capsulatus_genome_promoter_predictions.csv"
-
+nextflow run sRNACharP-Ranking.nf  --org="R_capsulatus" --dir="/ADD_PATH/sRNACharP-Ranking/test_data" --genome="R_capsulatus_genome.fasta"  --sRNAs="R_capsulatus_sRNAs.bed" --genomeAnnotation="R_capsulatus_genomeAnnotation_proteincoding.bed" --promoterFile="R_capsulatus_genome_promoter_predictions.csv" --classifier="RF_classifier4sRNA.sav"
 ```
 
 On your terminal you should see something like this:
@@ -184,6 +181,17 @@ NC_016810.1     TransTermHP     TERM2   13530   13572   83      +       .
 NC_016810.1     TransTermHP     TERM3   13538   13564   100     +       .
 NC_016810.1     TransTermHP     TERM4   14760   14779   100     +       .
 
+```
+
+* `rankedProbability.txt` - The output file consists of three columns: putative sRNA ID, probability of not being a sRNA, and probability of being a sRNA (third column). Note that per each putative sRNA the probability at the 2nd column + the probability at the 3rd column equals to 1. The output file only contains two column labels: one for the 2nd column and one for the third column. Here it is a sample output file.
+
+```
+	No sRNA	sRNA
+sRNA00508	0.218	0.782
+sRNA00526	0.2	0.8
+sRNA00627	0.17	0.83
+sRNA00687	0.248	0.752
+sRNA00688	0.194	0.806
 ```
 
 * Three more files are generated in the working directory: `ORGANISMRNAsSS.txt`, `ORGANISMGenomelength.txt`, and `ORGANISMRNA_sortedPromoterPredictions.bed` containing the free energy of the predicted secondary structure, the number of nucleotides in the genome, and sorted promoter predictions respectively.
